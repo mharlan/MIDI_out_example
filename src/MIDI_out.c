@@ -3,7 +3,6 @@
  */
 
 #include "MIDI_out.h"
-//#include "bit_ops.h"
 
 #include <zneo.h>
 
@@ -36,21 +35,25 @@ void interrupt midi_out_transfer(void)
 
 void init_midi_out(void)
 {
-	PDAFH &= ~PORTD_TXD1_AF;
-	PDAFL |= PORTD_TXD1_AF;
+	//set port D5 alternate function 1
+	PDAFH &= ~PORTD_TXD1_AF;  //Set bit 5 to 0
+	PDAFL |= PORTD_TXD1_AF;   //Set bit 5 to 1
 
+	//set the UART baudrate
 	U1BR = FREQ / (MIDI_BAUDRATE * 16UL);
 
-	U1CTL0 = UART1_TXD_EN;
+	//enable the UART for transmit
+	U1CTL0 = UART1_TXD_EN;    //Set bit 7 to 1
 	U1CTL1 = 0;
 
-	//set nominal priority
-	IRQ2ENH |= UART1_IRQ_EN;
-	IRQ2ENL &= ~UART1_IRQ_EN;
+	//set nominal interrupt priority
+	IRQ2ENH |= UART1_IRQ_EN;  //Set bit 5 to 1
+	IRQ2ENL &= ~UART1_IRQ_EN; //Set bit 5 to 0
 
-	PAIMUX |= UART1_IRQ_EN;	    //Port D5 (1) for interrupts
-	PAIEDGE &= ~UART1_IRQ_EN;	//Port D5, negedge (0) interrupt
+	PAIMUX |= UART1_IRQ_EN;	  //Port D5 (1) for interrupts
+	PAIEDGE &= ~UART1_IRQ_EN; //Port D5, negedge (0) interrupt
 
+	//set the TXD1 interrupt vector
 	SET_VECTOR(UART1_TX, midi_out_transfer);
 }
 

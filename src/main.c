@@ -2,9 +2,10 @@
 	Author: Matthew Harlan
 	Email:  mharlan@gwmail.gwu.edu
 	
-	Description: This program drives a MIDI output port.
+	Description: This program drives a MIDI output port. Send a note on event with
+	button SW1. Send a note off event with button SW2.
 
-	Other files: buttons.c delay.c delay.h MIDI_out.c MIDI_out.h MIDI_messages.c 
+	Other files: buttons.c buttons.h delay.c delay.h MIDI_out.c MIDI_out.h MIDI_messages.c 
 	MIDI_messages.h oscillator.c oscillator.h timer.c timer.h
 
 	Compile: Set the user include path to the include directory.
@@ -13,7 +14,7 @@
 	but only if your microcontroller pins consistently output a current greater than 
 	5 mA from each output pin. It is a good idea to use them for the buffer to be
 	on the safe side and encourage compatibility with a wide variety of MIDI input
-	devices.
+	devices. I know that for my context kit board I needed to use the inverters.
  */
 
 #include "MIDI_out.h"
@@ -25,7 +26,7 @@
 #include <stdio.h>
 
 /*
-	Intializes the hardware, loop on the CLI.
+	Intializes the hardware and loop.
  */
 void main(void)
 {

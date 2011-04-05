@@ -1,20 +1,19 @@
-
 #include "buttons.h"
 #include "timer.h"
 #include "MIDI_messages.h"
 
 #include <zneo.h>
 
-#define DEBOUNCE_CUTOFF     40 	//40 ms
-#define BUTTON_TWICE_CUTOFF 500	//500 ms
+#define DEBOUNCE_CUTOFF     40 //40 ms
+#define BUTTON_TWICE_CUTOFF 500 //500 ms
 
-#define BUTTON_NONE  0xC8
-#define BUTTON_ONE   0xC0
-#define BUTTON_TWO   0x88
-#define BUTTON_THREE 0x48
+#define BUTTON_NONE         0xC8
+#define BUTTON_ONE          0xC0
+#define BUTTON_TWO          0x88
+#define BUTTON_THREE        0x48
 
-#define BUTTON_PRESSED     1
-#define BUTTON_NOT_PRESSED 0
+#define BUTTON_PRESSED      1
+#define BUTTON_NOT_PRESSED  0
 
 static volatile int button_timer;
 static int debounce_cutoff;
@@ -30,32 +29,32 @@ static void handle_button_events(void);
 
 /*
 	Initializes the buttons.
- */
+*/
 void init_buttons(void)
 {
 	//set as inputs
 	PDDD |= BUTTON_ONE;
 	PFDD |= BUTTON_TWO + BUTTON_THREE;
-
+	
 	current = BUTTON_NONE;
 	previous = BUTTON_NONE;
 	button_state = BUTTON_NOT_PRESSED;
 	last_button = BUTTON_NONE;
-
+	
 	button_timer = 0;
 	debounce_cutoff = DEBOUNCE_CUTOFF;
-
+	
 	button_twice_timer = 0;
 	button_twice_cutoff = BUTTON_TWICE_CUTOFF;
 }
-
+	
 /*
 	Processes button events.
- */
+*/
 void button_events(void)
 {
 	button_timer += timer_interval_int();
-
+	
 	if(button_twice_timer >= button_twice_cutoff) {
 		button_twice_timer = 0;
 		last_button = BUTTON_NONE;
@@ -63,13 +62,13 @@ void button_events(void)
 	else if(button_twice_timer > 0) {
 		button_twice_timer += timer_interval_int();
 	}
-
+	
 	//check buttons every debounce interval
 	if(button_timer >= debounce_cutoff) {
 		button_timer = 0;
 		
 		previous = current;
-		current = (PDIN & 0x08) | (PFIN & 0xC0);	//gets the state of all buttons
+		current = (PDIN & 0x08) | (PFIN & 0xC0); //gets the state of all buttons
 		
 		if(current == previous) {
 			if(current != BUTTON_NONE) {
@@ -87,8 +86,8 @@ void button_events(void)
 }
 
 /*
-	Handles the button event.
- */
+Handles the button event.
+*/
 static void handle_button_events(void)
 {
 	if(current == BUTTON_ONE) {
@@ -109,7 +108,7 @@ static void handle_button_events(void)
 		}
 		else {
 			last_button = BUTTON_TWO;
-
+				
 			midi_msg_note_off(MIDI_CHANNEL1, 0x3C);
 		}
 	}
@@ -120,7 +119,7 @@ static void handle_button_events(void)
 		}
 		else {
 			last_button = BUTTON_THREE;
-
+			
 			//send a controller msg here
 		}
 	}
